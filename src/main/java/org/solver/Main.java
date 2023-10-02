@@ -16,7 +16,7 @@ public class Main {
 
         Scheme scheme = new Scheme();
         System.out.print("Create scheme\n");
-        for(int i = 0; i < N; i++){
+        for(int i = 1; i < N+1; i++){
             scheme.AddNewNode(i);
             System.out.print("Add new node to scheme\n");
         }
@@ -35,9 +35,11 @@ public class Main {
 
             System.out.print("Input finish node of new element:");
             int finish = in.nextInt();
-
-            scheme.AddNewElem(type_elem, start, finish);
+            String name = in.nextLine();
+            scheme.AddNewElem(type_elem, start, finish, name);
             System.out.print("Add new element to scheme");
+
+
 
         }
 
