@@ -6,15 +6,20 @@ public class Element {
     private Node start;
     private Node finish;
     private String name;
+    private double value;
     private int type;
 
     private ArrayList<ArrayList<Double>> matrix = new ArrayList<>();
-    Element(Node start, Node finish, int type, String name){
+
+    public Element(Node start, Node finish, int type, String name, double value) {
         this.start = start;
         this.finish = finish;
         this.type = type;
         this.name = name;
+        this.value = value;
     }
+
+
     public Node getFinish() {
         return finish;
     }
@@ -38,16 +43,10 @@ public class Element {
     public int getType() {
         return type;
     }
+    public void printInfo(){
+        System.out.printf("------------------------------\nName: %s\nValue:%f\nType:%d\nNode start: %d  Node finish: %d\n" +
+                "------------------------------\n", name, value, type, start.getNumber(),finish.getNumber());
 
-//    public void generateMatrix(){
-//        switch (type){
-//            case 1:
-////                for (int i = 0; i < 3; i++){
-////                    ArrayList<Double>
-////                    matrix.add()
-////                }
-//                break;
-//        }
-//
-//    }
+    }
+
 }

@@ -25,23 +25,31 @@ public class Main {
 
         for(int i = 0; i < M; i++){
 
-            System.out.print("Input type of new element:");
+            System.out.print("Input type of new element:\n");
             int type_elem;
             type_elem = in.nextInt();
 
+            System.out.print("Input value of new element:\n");
+            double value;
+            value = in.nextDouble();
 
-            System.out.print("Input start node of new element:");
+            System.out.print("Input start node of new element:\n");
             int start = in.nextInt();
 
-            System.out.print("Input finish node of new element:");
+            System.out.print("Input finish node of new element:\n");
             int finish = in.nextInt();
+            in.nextLine();
+            System.out.print("Input name of new element:\n");
             String name = in.nextLine();
-            scheme.AddNewElem(type_elem, start, finish, name);
+
+//            System.out.printf("%d, %d, %d, %s, %f",type_elem, start, finish, name, value);
+            scheme.AddNewElem(type_elem, start, finish, name, value);
             System.out.print("Add new element to scheme");
 
 
 
         }
+        scheme.printInfo();
 
 
 
