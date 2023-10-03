@@ -9,6 +9,7 @@ public class Element {
     private String name;
     private double value;
     private int type;
+    private double val_n_1 = 0;
 
     private ArrayList<ArrayList<Double>> matrix = new ArrayList<>();
 
@@ -25,8 +26,20 @@ public class Element {
         this.index = index;
     }
 
+    public double getVal_n_1() {
+        return val_n_1;
+    }
+
+    public void setVal_n_1(double val_n_1) {
+        this.val_n_1 = val_n_1;
+    }
+
     public int getIndex() {
         return index;
+    }
+
+    public double getValue() {
+        return value;
     }
 
     public Node getFinish() {

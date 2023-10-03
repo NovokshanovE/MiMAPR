@@ -35,6 +35,10 @@ public class Node {
 
     }
 
+    public Double getPotential() {
+        return potential;
+    }
+
     public int getNumber() {
         return number;
     }
