@@ -1,7 +1,9 @@
 package org.solver;
 
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Node {
     private ArrayList<Element> nearest_elems = new ArrayList<Element>();
@@ -12,9 +14,25 @@ public class Node {
         this.number = number;
 
     }
+    private boolean findElem(Element elem){
+        for(Element elem_i: this.nearest_elems){
+            if(elem_i.getIndex() == elem.getIndex()){
+//                System.out.printf("%d ---- %d", elem_i.getIndex(), elem.getIndex());
+                return false;
+            }
+        }
+        return true;
+
+    }
     public void addNearest_elems(Element elem) {
-        this.nearest_elems.add(elem);
-        System.out.println("Add new elem to "+number + "--Type:" + elem.getType() + "\n");
+        if(findElem(elem)){
+            this.nearest_elems.add(elem);
+            System.out.println("Add new elem to "+number + "--Type:" + elem.getType() + "\n");
+            return;
+        }
+
+        System.out.println("Element has already added.\n");
+
     }
 
     public int getNumber() {

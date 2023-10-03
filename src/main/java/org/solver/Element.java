@@ -3,6 +3,7 @@ package org.solver;
 import java.util.ArrayList;
 
 public class Element {
+    private int index;
     private Node start;
     private Node finish;
     private String name;
@@ -11,14 +12,22 @@ public class Element {
 
     private ArrayList<ArrayList<Double>> matrix = new ArrayList<>();
 
-    public Element(Node start, Node finish, int type, String name, double value) {
+    public Element(Node start, Node finish, int type, String name, double value, int index) {
         this.start = start;
         this.finish = finish;
         this.type = type;
         this.name = name;
         this.value = value;
+        this.index = index;
     }
 
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public int getIndex() {
+        return index;
+    }
 
     public Node getFinish() {
         return finish;

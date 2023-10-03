@@ -14,6 +14,9 @@ public class Scheme implements Cloneable{
         this.nodes.add(new Node(0));
 
     }
+    public Scheme(Scheme new_scheme){
+
+    }
     public void AddNewElem(int type, int start, int finish, String name, double value){
 
         Node start_node = nodes.get(start);
@@ -29,7 +32,7 @@ public class Scheme implements Cloneable{
             sources_current.add(elems.size());
         }
 
-        Element new_elem = new Element(start_node, finish_node, type, name, value);
+        Element new_elem = new Element(start_node, finish_node, type, name, value, elems.size());
 
         start_node.addNearest_elems(new_elem);
         finish_node.addNearest_elems(new_elem);
@@ -48,6 +51,8 @@ public class Scheme implements Cloneable{
         Node new_node = new Node(node);
         nodes.add(new_node);
     }
+
+    @Override
     public Scheme clone() throws CloneNotSupportedException{
 
         return (Scheme) super.clone();

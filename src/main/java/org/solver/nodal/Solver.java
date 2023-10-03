@@ -1,11 +1,15 @@
 package org.solver.nodal;
 
-import com.sun.org.apache.regexp.internal.RE;
+
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.math4.legacy.linear.Array2DRowRealMatrix;
 import org.apache.commons.math4.legacy.linear.RealMatrix;
 import org.apache.commons.math4.legacy.linear.RealVector;
 import org.solver.Element;
 import org.solver.Scheme;
+
+import javax.crypto.Mac;
+import java.io.Serializable;
 
 /*
 * Этот класс необходим для решения задачи узловым методом.
@@ -17,8 +21,12 @@ public class Solver implements Cloneable{
     private RealMatrix matrix;
     private RealVector vector;
     public Solver(Scheme scheme) throws CloneNotSupportedException {
-        
+
+
         this.scheme = scheme.clone();
+        System.out.println("-------------------------------------\n" +
+                "-------------------------------------\n");
+        scheme.printInfo();
 
     }
 
