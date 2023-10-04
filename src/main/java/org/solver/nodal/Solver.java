@@ -90,4 +90,13 @@ public class Solver implements Cloneable{
 
         return column;
     }
+
+    public void generateMatrix() {
+
+    }
+
+
+    public void generateVector() {
+
+    }
 }
