@@ -92,7 +92,7 @@ public class Solver implements Cloneable{
     }
 
     public void generateMatrix() {
-        this.matrix = new Array2DRowRealMatrix();
+//        this.matrix = new Array2DRowRealMatrix();
     }
 
 
