@@ -31,6 +31,7 @@ public class Main {
         int N = in.nextInt();
 
         Scheme scheme = new Scheme();
+        scheme.printInfo();
         System.out.print("Create scheme\n");
         for(int i = 1; i < N+1; i++){
             scheme.AddNewNode(i);

@@ -1,16 +1,12 @@
-package org.solver.nodal;
+package org.solver.nodal.advanced_for_mechanical_systems;
 
 
-import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.math4.legacy.linear.Array2DRowRealMatrix;
 import org.apache.commons.math4.legacy.linear.ArrayRealVector;
 import org.apache.commons.math4.legacy.linear.RealMatrix;
 import org.apache.commons.math4.legacy.linear.RealVector;
 import org.solver.Element;
 import org.solver.Scheme;
-
-import javax.crypto.Mac;
-import java.io.Serializable;
 
 /*
 * Этот класс необходим для решения задачи узловым методом.

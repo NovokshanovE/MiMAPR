@@ -1,6 +1,7 @@
 package org.solver;
 
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Scheme implements Cloneable{
     private ArrayList<Node> nodes = new ArrayList<Node>();
@@ -32,14 +33,35 @@ public class Scheme implements Cloneable{
             sources_current.add(elems.size());
         }
 
+//        if(type == 1){
+//            VoltageSource new_elem = new VoltageSource(start_node, finish_node, type, name, value, elems.size());
+//            start_node.addNearest_elems(new_elem);
+//            finish_node.addNearest_elems(new_elem);
+//            this.elems.add(new_elem);
+//            Scanner in = new Scanner(System.in);
+//            int type_voltage = in.nextInt();
+//            if(type_voltage != 0){
+//                new_elem.setType_voltage_source(true);
+//            }
+//            else {
+//                new_elem.setType_voltage_source(false);
+//            }
+//
+//            System.out.print("Add new elem to Scheme\n");
+//        }
+//        else{
         Element new_elem = new Element(start_node, finish_node, type, name, value, elems.size());
-
         start_node.addNearest_elems(new_elem);
         finish_node.addNearest_elems(new_elem);
         this.elems.add(new_elem);
         System.out.print("Add new elem to Scheme\n");
+//        }
+
+
     }
     public void printInfo(){
+        /* Функция для вывода информации о составленной схеме
+        * */
         System.out.printf("Number of sources of EMF: %d\n", sources_EMF.size());
         System.out.printf("Number of current sources: %d\n", sources_current.size());
         for(Node node: this.nodes){
