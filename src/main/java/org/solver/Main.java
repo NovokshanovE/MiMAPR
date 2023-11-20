@@ -24,7 +24,7 @@ public class Main {
         return null;
     }
     public static Scheme createScheme(){
-        System.out.printf("Creating scheme:\n");
+        System.out.print("Creating scheme:\n");
 
         Scanner in = new Scanner(System.in);
         System.out.print("Input numbers of nodes:");
