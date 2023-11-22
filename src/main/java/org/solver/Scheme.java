@@ -6,10 +6,10 @@ public class Scheme implements Cloneable{
     private ArrayList<Node> nodes = new ArrayList<Node>();
     private ArrayList<Element> elems = new ArrayList<Element>();
 //   list of  index sources of EMF
-    private ArrayList<Integer> sources_EMF = new ArrayList<Integer>();
+    private ArrayList<Element> sources_EMF = new ArrayList<Element>();
 
 //    list of index current sources
-    private ArrayList<Integer> sources_current = new ArrayList<Integer>();
+    private ArrayList<Element> sources_current = new ArrayList<Element>();
     public Scheme(){
         this.nodes.add(new Node(0));
 
@@ -26,17 +26,18 @@ public class Scheme implements Cloneable{
 
 
 //  Add index of source to list
-        if(type == 1){
-            sources_EMF.add(elems.size());
-        } else if (type == 5) {
-            sources_current.add(elems.size());
-        }
+
 
         Element new_elem = new Element(start_node, finish_node, type, name, value, elems.size());
 
         start_node.addNearest_elems(new_elem);
         finish_node.addNearest_elems(new_elem);
         this.elems.add(new_elem);
+        if(type == 1){
+            sources_EMF.add(new_elem);
+        } else if (type == 5) {
+            sources_current.add(new_elem);
+        }
         System.out.print("Add new elem to Scheme\n");
     }
     public void printInfo(){
@@ -45,6 +46,11 @@ public class Scheme implements Cloneable{
         for(Node node: this.nodes){
             node.printNearestElems();
         }
+        System.out.print("EMF:\n");
+        for(Element elem: this.sources_EMF){
+            elem.printInfo();
+        }
+
     }
 
     public void AddNewNode(int node) {
@@ -52,9 +58,24 @@ public class Scheme implements Cloneable{
         nodes.add(new_node);
     }
 
+    public int nodeNumbers(){
+        return nodes.size();
+    }
+
+    public int EMF_Numbers(){
+        return sources_EMF.size();
+    }
+    public Node getNode(int index){
+        return nodes.get(index);
+    }
+    public Element getEMF(int index){
+        return sources_EMF.get(index);
+    }
     @Override
     public Scheme clone() throws CloneNotSupportedException{
 
         return (Scheme) super.clone();
     }
+
+
 }

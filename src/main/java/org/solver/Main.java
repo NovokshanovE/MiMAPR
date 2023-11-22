@@ -14,6 +14,7 @@ public class Main {
         System.out.print("Start...\n");
         Scheme scheme = createScheme();
         Solver solver = new Solver(scheme);
+
     }
     public static Scheme createScheme(boolean key){
         System.out.print("Creating scheme:\n");
