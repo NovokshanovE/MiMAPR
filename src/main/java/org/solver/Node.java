@@ -50,6 +50,9 @@ public class Node {
             elem.printInfo();
         }
     }
+    public ArrayList<Element> getNearest_elems() {
+        return nearest_elems;
+    }
 }
 
 

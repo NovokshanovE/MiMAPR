@@ -1,6 +1,7 @@
 package org.solver;
 
-import org.solver.nodal.Solver;
+
+import org.solver.mechanical.Solver;
 
 import java.util.Scanner;
 
@@ -14,6 +15,7 @@ public class Main {
         System.out.print("Start...\n");
         Scheme scheme = createScheme();
         Solver solver = new Solver(scheme);
+        solver.Solution();
 
     }
     public static Scheme createScheme(boolean key){
