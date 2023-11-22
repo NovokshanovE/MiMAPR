@@ -38,7 +38,7 @@ public class Solver implements Cloneable{
         this.MSize = 3*scheme.nodeNumbers() + scheme.EMF_Numbers();
         this.NSize = 3*scheme.nodeNumbers();
         this.EMFSize = scheme.EMF_Numbers();
-
+        dt = 0.001;
         generateMatrix();
     }
 
@@ -62,11 +62,23 @@ public class Solver implements Cloneable{
         RealMatrix new_matrix = new Array2DRowRealMatrix(this.MSize,this.MSize);
         for(int i = 1; i < scheme.nodeNumbers(); i++){
             for(int j = 0; j < 3; j++){
-                for(Pair<Integer, Integer> var: deltaVar){
+                if(j<=1){
+                    for(int k = 0; k < deltaVar.size(); k++){
+                        if(k == i*3+j){
+                            new_matrix.setEntry(i*3+j, k, 1.);
+                        } else if (j+1 == deltaVar.get(k).first) {
+                            new_matrix.setEntry(i*3+j, k, -1./dt);
+
+                        }
+
+                    }
+                } else{
 
                 }
+
             }
         }
+
         System.out.print(new_matrix);
     }
 
