@@ -205,6 +205,9 @@ public class Solver implements Cloneable{
         }
         matrix = new_matrix;
     }
+    public void generateVector(){
+
+    }
 
 
 }
