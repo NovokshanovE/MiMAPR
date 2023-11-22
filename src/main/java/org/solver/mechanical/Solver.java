@@ -9,9 +9,14 @@ import org.solver.Scheme;
 
 import java.util.ArrayList;
 
-/*
-* Этот класс необходим для решения задачи расширенным узловым методом для механических систем.
-* */
+/**
+ * Этот класс необходим для решения задачи расширенным узловым методом для механических систем.<br />
+ * <img src="doc/img.png" width="500"/>
+ * <img src="doc/img_1.png" width="500"/>
+ * <img src="doc/img_2.png" width="500"/>
+ */
+
+
 public class Solver implements Cloneable{
     private Scheme scheme;
     private double dt;
@@ -19,9 +24,29 @@ public class Solver implements Cloneable{
     private RealMatrix matrix;
     private RealVector vector;
 
+    /**
+     * количество строк
+     */
     private int MSize;
+
+    /**
+     * количество строк, связанных с потенциалами в узлах
+     */
     private int NSize;
+
+    /**
+     * количество строк, связанных с
+     * током в ЭДС
+     */
     private int EMFSize;
+
+    /**
+    * Mассив, где хранится необходимая информация о переменных:
+    * 0 - производная;
+    * 1 - интеграл;
+    * 2 - потенциал;
+    * 3 - ток ЭДС.
+    * */
     private ArrayList<Pair<Integer, Integer>> deltaVar;
     public Solver(Scheme scheme) throws CloneNotSupportedException {
 
@@ -44,15 +69,15 @@ public class Solver implements Cloneable{
 
     public void setDeltaVar() {
         for (int i = 1; i < scheme.nodeNumbers(); i++) {
-            Pair<Integer, Integer> new_var = new Pair<Integer, Integer>(1, i);
+            Pair<Integer, Integer> new_var = new Pair<Integer, Integer>(0, i);
+            deltaVar.add(new_var);
+            new_var = new Pair<Integer, Integer>(1, i);
             deltaVar.add(new_var);
             new_var = new Pair<Integer, Integer>(2, i);
             deltaVar.add(new_var);
-            new_var = new Pair<Integer, Integer>(3, i);
-            deltaVar.add(new_var);
         }
         for (int i = 0; i < scheme.EMF_Numbers(); i++) {
-            Pair<Integer, Integer> new_var = new Pair<Integer, Integer>(4, i);
+            Pair<Integer, Integer> new_var = new Pair<Integer, Integer>(3, i);
             deltaVar.add(new_var);
         }
     }
@@ -66,7 +91,7 @@ public class Solver implements Cloneable{
                     for(int k = 0; k < deltaVar.size(); k++){
                         if(k == i*3+j){
                             new_matrix.setEntry(i*3+j, k, 1.);
-                        } else if (j+1 == deltaVar.get(k).first) {
+                        } else if (j == deltaVar.get(k).first) {
                             new_matrix.setEntry(i*3+j, k, -1./dt);
 
                         }
