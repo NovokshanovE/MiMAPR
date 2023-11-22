@@ -207,6 +207,8 @@ public class Solver implements Cloneable{
     }
     public void generateVector(){
 
+
+
     }
 
 
