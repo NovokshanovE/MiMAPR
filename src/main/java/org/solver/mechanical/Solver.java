@@ -12,6 +12,7 @@ import org.solver.Node;
 import org.solver.Scheme;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Этот класс необходим для решения задачи расширенным узловым методом для механических систем.<br />
@@ -27,6 +28,7 @@ public class Solver implements Cloneable{
     private double r = 0.0001;
     private RealMatrix matrix;
     private RealVector vector;
+    private ArrayList<Double> unknown;
 
     /**
      * количество строк
@@ -67,10 +69,13 @@ public class Solver implements Cloneable{
         this.MSize = 3*(scheme.nodeNumbers()-1) + scheme.EMF_Numbers();
         this.NSize = 3*(scheme.nodeNumbers()-1);
         this.EMFSize = scheme.EMF_Numbers();
+        this.unknown = new ArrayList<>(MSize);
         dt = 0.001;
         setDeltaVar();
         generateMatrix();
+        printMatrix();
     }
+
 
     public void setDeltaVar() {
         for (int i = 1; i < scheme.nodeNumbers(); i++) {
@@ -195,18 +200,69 @@ public class Solver implements Cloneable{
             }
         }
 
-        System.out.print("Matrix:\n");
+
+        matrix = new_matrix;
+    }
+    public void printMatrix(){
+        System.out.print("Matrix:\n       ");
+        for(MutablePair<Integer, Integer> param: deltaVar) {
+            switch (param.getLeft()){
+                case 0:
+                    System.out.printf("d(p%d) ", param.getRight());
+                    break;
+                case 1:
+                    System.out.printf("inter(p%d)", param.getRight());
+                    break;
+                case 2:
+                    System.out.printf("p%d", param.getRight());
+                    break;
+                case 3:
+                    System.out.printf("I_{E_%d}", param.getRight());
+                    break;
+            }
+        }
+        System.out.print("\n");
         for(int i = 0; i < MSize; i++){
+            switch (deltaVar.get(i).getLeft()){
+                case 0:
+                    System.out.printf("d(p%d) ", deltaVar.get(i).getRight());
+                    break;
+                case 1:
+                    System.out.printf("inter(p%d) ", deltaVar.get(i).getRight());
+                    break;
+                case 2:
+                    System.out.printf("p%d  ", deltaVar.get(i).getRight());
+                    break;
+                case 3:
+                    System.out.printf("I_{E_%d} ", deltaVar.get(i).getRight());
+                    break;
+            }
             for(int j = 0; j < MSize; j++){
-                System.out.printf("%f, ", new_matrix.getEntry(i, j));
+                System.out.printf("%f, ", matrix.getEntry(i, j));
             }
             System.out.print("\n");
 
         }
-        matrix = new_matrix;
+
+
     }
     public void generateVector(){
+        for(MutablePair<Integer, Integer> param: deltaVar) {
+            switch (param.getLeft()){
+                case 0:
 
+                    break;
+                case 1:
+
+                    break;
+                case 2:
+
+                    break;
+                case 3:
+
+                    break;
+            }
+        }
 
 
     }

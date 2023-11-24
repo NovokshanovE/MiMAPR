@@ -8,6 +8,7 @@ public class Element {
     private Node finish;
     private String name;
     private double value;
+    private double current_value = 0.;
     private int type;
     private double val_n_1 = 0;
 

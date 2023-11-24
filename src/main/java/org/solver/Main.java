@@ -17,6 +17,7 @@ public class Main {
         Solver solver = new Solver(scheme);
         solver.Solution();
 
+
     }
     public static Scheme createScheme(boolean key){
         System.out.print("Creating scheme:\n");
