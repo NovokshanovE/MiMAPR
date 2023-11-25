@@ -24,11 +24,12 @@ import java.util.Arrays;
 
 public class Solver implements Cloneable{
     private Scheme scheme;
-    private double dt;
+    private double dt= 0.0001;
     private double r = 0.0001;
     private RealMatrix matrix;
     private RealVector vector;
-    private ArrayList<Double> unknown;
+    private ArrayList<Double> unknown_prev;
+    private ArrayList<Double> unknown_curr;
 
     /**
      * количество строк
@@ -69,8 +70,10 @@ public class Solver implements Cloneable{
         this.MSize = 3*(scheme.nodeNumbers()-1) + scheme.EMF_Numbers();
         this.NSize = 3*(scheme.nodeNumbers()-1);
         this.EMFSize = scheme.EMF_Numbers();
-        this.unknown = new ArrayList<>(MSize);
-        dt = 0.001;
+        this.unknown_prev = new ArrayList<>(MSize);
+        this.unknown_curr = new ArrayList<>(MSize);
+
+        this.dt = 0.001;
         setDeltaVar();
         generateMatrix();
         printMatrix();
@@ -104,20 +107,24 @@ public class Solver implements Cloneable{
             switch (key){
                 case 0:
                     if(elem.getType() == 2) {
-                        res += direction * val;
+                        res += direction*(1/val);
                     }
                     break;
                 case 1:
                     if(elem.getType() == 4) {
-                        res += direction*(1/val);
+                        res += direction*(val);
                     }
                     break;
                 case 2:
+
+                    System.out.println("!!!");
                     if(elem.getType() == 3) {
                         res += direction * (1 / val);
                     }
+
                     break;
                 case 3:
+
                     if(elem.getType() == 1) {
                         res += direction;
                     }
@@ -127,37 +134,7 @@ public class Solver implements Cloneable{
         }
         return res;
     }
-    // *
-    // * ArrayList<Element> nearest_elems = node.getNearest_elems();
-    //     double res = 0.;
-    //     for(Element elem: nearest_elems){
-    //         double val = elem.getValue();
-    //         int direction = 1;
-    //         if(elem.getFinish() == node){
-    //             direction = -1;
-    //         }
-    //         switch (elem.getType()){
-    //             case 1:
-    //                 res += direction;
-    //                 break;
-    //             case 2:
-    //                 res += direction*(val);
-    //                 break;
-    //             case 3:
-    //                 res += direction*(1/val);
-    //                 break;
-    //             case 4:
-    //                 res += direction*(1/val);
-    //                 break;
-    //             case 5:
-    //                 res += direction*(1/val);
-    //                 break;
-    //             default:
-    //                 res += direction*(1/val);
-    //         }
-    //     }
-    //     return res;
-    //     *
+
 
     public void generateMatrix(){
 
@@ -169,18 +146,37 @@ public class Solver implements Cloneable{
                     for(int k = 0; k < deltaVar.size(); k++){
                         if(k == i*3+j){
                             new_matrix.setEntry(i*3+j, k, 1.);
-                        } else if (j == deltaVar.get(k).getLeft()) {
-                            new_matrix.setEntry(i*3+j, k, -1./dt);
-
+                        } else if(deltaVar.get(i*3+j).getLeft() == 0 && deltaVar.get(k).getLeft() == 2){
+                            if(deltaVar.get(i*3+j).getRight() == deltaVar.get(k).getRight()){
+                                new_matrix.setEntry(i*3+j, k, -1/dt);
+                            }
+                        } else if (deltaVar.get(i*3+j).getLeft() == 1 && deltaVar.get(k).getLeft() == 2) {
+                            if(deltaVar.get(i*3+j).getRight() == deltaVar.get(k).getRight()){
+                                new_matrix.setEntry(i*3+j, k, -dt);
+                            }
                         }
+//                        (j == deltaVar.get(k).getLeft()) {
+//                            new_matrix.setEntry(i*3+j, k, -55);//-1/dt);
+//
+//                        }
 
                     }
                 } else{
                     for(int k = 0; k < deltaVar.size(); k++){
                         int index = deltaVar.get(k).getRight();
                         int key = deltaVar.get(k).getLeft();
-                        Node current_node = scheme.getNode(index);
-                        new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node, key));
+                        if(key <= 2){
+                            Node current_node = scheme.getNode(index);
+                            new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node, key));
+                        }
+                        else{
+                            index = deltaVar.get(i).getRight();
+
+                            Node current_node = scheme.getNode(index);
+                            new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node, key));
+
+                        }
+
 
 
 
@@ -211,13 +207,13 @@ public class Solver implements Cloneable{
                     System.out.printf("d(p%d) ", param.getRight());
                     break;
                 case 1:
-                    System.out.printf("inter(p%d)", param.getRight());
+                    System.out.printf("inter(p%d) ", param.getRight());
                     break;
                 case 2:
-                    System.out.printf("p%d", param.getRight());
+                    System.out.printf("p%d ", param.getRight());
                     break;
                 case 3:
-                    System.out.printf("I_{E_%d}", param.getRight());
+                    System.out.printf("I_{E_%d} ", param.getRight());
                     break;
             }
         }
@@ -238,7 +234,7 @@ public class Solver implements Cloneable{
                     break;
             }
             for(int j = 0; j < MSize; j++){
-                System.out.printf("%f, ", matrix.getEntry(i, j));
+                System.out.printf("%4.4f, ", matrix.getEntry(i, j));
             }
             System.out.print("\n");
 
@@ -266,6 +262,36 @@ public class Solver implements Cloneable{
 
 
     }
+    public double solveNearestElementsToVector(Node node, int key){
+
+        ArrayList<Element> nearest_elems = node.getNearest_elems();
+        double res = 0.;
+        switch (key){
+            case 0:
+
+                break;
+            case 1:
+
+                break;
+            case 2:
+
+                break;
+            case 3:
+                for(Element elem: nearest_elems){
+                    double val = elem.getValue();
+                    int direction = 1;
+                    if(elem.getFinish() == node){
+                        direction = -1;
+                    }
+
+                }
+                break;
+
+        }
+
+        return res;
+    }
+
 
 
 }
