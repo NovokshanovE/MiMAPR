@@ -3,7 +3,6 @@ package org.solver.mechanical;
 
 
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math4.legacy.linear.Array2DRowRealMatrix;
 import org.apache.commons.math4.legacy.linear.RealMatrix;
 import org.apache.commons.math4.legacy.linear.RealVector;
@@ -12,7 +11,6 @@ import org.solver.Node;
 import org.solver.Scheme;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Этот класс необходим для решения задачи расширенным узловым методом для механических систем.<br />
@@ -117,7 +115,7 @@ public class Solver implements Cloneable{
                     break;
                 case 2:
 
-                    System.out.println("!!!");
+                    //System.out.println("!!!");
                     if(elem.getType() == 3) {
                         res += direction * (1 / val);
                     }
@@ -126,7 +124,7 @@ public class Solver implements Cloneable{
                 case 3:
 
                     if(elem.getType() == 1) {
-                        res += direction;
+                        res = direction;
                     }
                     break;
 
@@ -159,7 +157,7 @@ public class Solver implements Cloneable{
 //                            new_matrix.setEntry(i*3+j, k, -55);//-1/dt);
 //
 //                        }
-
+//TODO: необходимо пофиксить составление матрицы для схем с несколькими ЭДС
                     }
                 } else{
                     for(int k = 0; k < deltaVar.size(); k++){
@@ -243,13 +241,15 @@ public class Solver implements Cloneable{
 
     }
     public void generateVector(){
-        for(MutablePair<Integer, Integer> param: deltaVar) {
-            switch (param.getLeft()){
+        for(int i = 0; i < MSize; i++) {
+            switch (deltaVar.get(i).getLeft()){
                 case 0:
-
+                    int index = unknownFromIndexKey(2, deltaVar.get(i).getRight());
+                    vector.setEntry(i, unknown_curr.get(i) - (unknown_curr.get(index) - unknown_prev.get(index))/dt);
                     break;
                 case 1:
-
+                    index = unknownFromIndexKey(1, deltaVar.get(i).getRight());
+                    vector.setEntry(i, unknown_curr.get(index) - (unknown_curr.get(i)*dt + unknown_prev.get(index)));
                     break;
                 case 2:
 
@@ -262,35 +262,29 @@ public class Solver implements Cloneable{
 
 
     }
-    public double solveNearestElementsToVector(Node node, int key){
+    public double solveNearestElementsToVector(Node node){
 
         ArrayList<Element> nearest_elems = node.getNearest_elems();
         double res = 0.;
-        switch (key){
-            case 0:
-
-                break;
-            case 1:
-
-                break;
-            case 2:
-
-                break;
-            case 3:
-                for(Element elem: nearest_elems){
-                    double val = elem.getValue();
-                    int direction = 1;
-                    if(elem.getFinish() == node){
-                        direction = -1;
-                    }
-
-                }
-                break;
-
-        }
-
+        //for(int i = 0; i <= ne)
         return res;
     }
+    public double solveNearestElementsToVector(Element elem, int key){
+        double res = 0.;
+        return res;
+    }
+
+    public int unknownFromIndexKey(int key, int i){
+        for(int j = 0; j < MSize; j++){
+            if(deltaVar.get(j).getRight() == i && deltaVar.get(j).getLeft() == key){
+                return i;
+            }
+        }
+        return 0;
+
+    }
+
+
 
 
 

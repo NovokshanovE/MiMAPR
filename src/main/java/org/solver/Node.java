@@ -10,6 +10,7 @@ public class Node {
 
     private int number;
     private Double potential = 0.;
+    private Double potetial_prev = 0.;
     Node(int number){
         this.number = number;
 
