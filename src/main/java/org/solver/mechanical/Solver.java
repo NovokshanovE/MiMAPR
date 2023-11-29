@@ -96,6 +96,7 @@ public class Solver implements Cloneable{
 
         ArrayList<Element> nearest_elems = node.getNearest_elems();
         double res = 0.;
+
         for(Element elem: nearest_elems){
             double val = elem.getValue();
             int direction = 1;
@@ -125,6 +126,7 @@ public class Solver implements Cloneable{
 
                     if(elem.getType() == 1) {
                         res = direction;
+                        elem.printInfo();
                     }
                     break;
 
@@ -157,7 +159,7 @@ public class Solver implements Cloneable{
 //                            new_matrix.setEntry(i*3+j, k, -55);//-1/dt);
 //
 //                        }
-//TODO: необходимо пофиксить составление матрицы для схем с несколькими ЭДС
+
                     }
                 } else{
                     for(int k = 0; k < deltaVar.size(); k++){
@@ -168,7 +170,7 @@ public class Solver implements Cloneable{
                             new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node, key));
                         }
                         else{
-                            index = deltaVar.get(i).getRight();
+                            index = deltaVar.get(i*3+j).getRight();
 
                             Node current_node = scheme.getNode(index);
                             new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node, key));
