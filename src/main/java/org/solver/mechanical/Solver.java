@@ -83,6 +83,11 @@ public class Solver implements Cloneable{
         Solve();
 
     }
+    /**
+     * TODO: необходимо исправить ошибку с сингулярной матрицей Якоби. Разобраться в том, почему резко возрастают значения неизвестных
+     *
+     *
+     */
     private void Solve(){
         for(double time = dt; time < T; time += dt){
             DecompositionSolver solver = new LUDecomposition(matrix).getSolver();
