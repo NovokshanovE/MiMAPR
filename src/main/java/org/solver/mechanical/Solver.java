@@ -126,7 +126,7 @@ public class Solver implements Cloneable{
 
                     if(elem.getType() == 1) {
                         res = direction;
-                        elem.printInfo();
+                        //elem.printInfo();
                     }
                     break;
 
@@ -244,9 +244,10 @@ public class Solver implements Cloneable{
     }
     public void generateVector(){
         for(int i = 0; i < MSize; i++) {
+            int index = 0;
             switch (deltaVar.get(i).getLeft()){
                 case 0:
-                    int index = unknownFromIndexKey(2, deltaVar.get(i).getRight());
+                    index = unknownFromIndexKey(2, deltaVar.get(i).getRight());
                     vector.setEntry(i, unknown_curr.get(i) - (unknown_curr.get(index) - unknown_prev.get(index))/dt);
                     break;
                 case 1:
@@ -257,7 +258,8 @@ public class Solver implements Cloneable{
 
                     break;
                 case 3:
-
+                    Element elem = scheme.getEMF(deltaVar.get(i).getRight());
+                    vector.setEntry(i, solveNearestEMFtoVector(elem));
                     break;
             }
         }
@@ -268,11 +270,39 @@ public class Solver implements Cloneable{
 
         ArrayList<Element> nearest_elems = node.getNearest_elems();
         double res = 0.;
-        //for(int i = 0; i <= ne)
+        for(Element elem: nearest_elems){
+            double val = elem.getValue();
+            int direction = 1;
+            if(elem.getFinish() == node){
+                direction = -1;
+            }
+
+            if(elem.getType() == 2) {
+                res += direction*(1/val);
+            }
+
+            else if(elem.getType() == 4) {
+                res += direction*(val);
+            }
+
+            else if(elem.getType() == 3) {
+                res += direction * (1 / val);
+            }
+
+
+            else if(elem.getType() == 1) {
+                res = direction;
+               // elem.printInfo();
+            }
+
+        }
         return res;
     }
-    public double solveNearestElementsToVector(Element elem, int key){
+    public double solveNearestEMFtoVector(Element elem){
         double res = 0.;
+        double p_s = unknown_curr.get(unknownFromIndexKey(2,elem.getStart().getNumber()));
+        double p_f = unknown_curr.get(unknownFromIndexKey(2,elem.getFinish().getNumber()));
+        res += p_s - p_f - elem.getValue();
         return res;
     }
 
