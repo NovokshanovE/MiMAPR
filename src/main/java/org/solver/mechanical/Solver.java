@@ -4,6 +4,7 @@ package org.solver.mechanical;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.math4.legacy.linear.Array2DRowRealMatrix;
+import org.apache.commons.math4.legacy.linear.ArrayRealVector;
 import org.apache.commons.math4.legacy.linear.RealMatrix;
 import org.apache.commons.math4.legacy.linear.RealVector;
 import org.solver.Element;
@@ -68,13 +69,20 @@ public class Solver implements Cloneable{
         this.MSize = 3*(scheme.nodeNumbers()-1) + scheme.EMF_Numbers();
         this.NSize = 3*(scheme.nodeNumbers()-1);
         this.EMFSize = scheme.EMF_Numbers();
-        this.unknown_prev = new ArrayList<>(MSize);
-        this.unknown_curr = new ArrayList<>(MSize);
+        this.unknown_prev = new ArrayList<Double>();
+
+        this.unknown_curr = new ArrayList<Double>();
+        for(int i = 0; i < MSize; i++){
+            unknown_curr.add(0.);
+            unknown_prev.add(0.);
+        }
 
         this.dt = 0.001;
         setDeltaVar();
         generateMatrix();
         printMatrix();
+        generateVector();
+        printVector();
     }
 
 
@@ -243,6 +251,7 @@ public class Solver implements Cloneable{
 
     }
     public void generateVector(){
+        vector = new ArrayRealVector(MSize);
         for(int i = 0; i < MSize; i++) {
             int index = 0;
             switch (deltaVar.get(i).getLeft()){
@@ -255,7 +264,8 @@ public class Solver implements Cloneable{
                     vector.setEntry(i, unknown_curr.get(index) - (unknown_curr.get(i)*dt + unknown_prev.get(index)));
                     break;
                 case 2:
-
+                    Node node = scheme.getNode(deltaVar.get(i).getRight());
+                    vector.setEntry(i, solveNearestElementsToVector(node));
                     break;
                 case 3:
                     Element elem = scheme.getEMF(deltaVar.get(i).getRight());
@@ -271,29 +281,38 @@ public class Solver implements Cloneable{
         ArrayList<Element> nearest_elems = node.getNearest_elems();
         double res = 0.;
         for(Element elem: nearest_elems){
+            double p_s_0 = unknown_curr.get(unknownFromIndexKey(0,elem.getStart().getNumber()));
+            double p_f_0 = unknown_curr.get(unknownFromIndexKey(0,elem.getFinish().getNumber()));
+            double p_s_1 = unknown_curr.get(unknownFromIndexKey(1,elem.getStart().getNumber()));
+            double p_f_1 = unknown_curr.get(unknownFromIndexKey(1,elem.getFinish().getNumber()));
+            double p_s_2 = unknown_curr.get(unknownFromIndexKey(2,elem.getStart().getNumber()));
+            double p_f_2 = unknown_curr.get(unknownFromIndexKey(2,elem.getFinish().getNumber()));
+
             double val = elem.getValue();
             int direction = 1;
             if(elem.getFinish() == node){
                 direction = -1;
+            } else if (elem.getStart() == node){
+                direction = 1;
+            }
+            switch (elem.getType()){
+                case 1:
+                    res += direction*unknown_curr.get(NSize+searchEMF_Index(elem));
+                    break;
+                case 2:
+                    res += direction*elem.getValue()*(p_s_0 - p_f_0);
+                    break;
+                case 3:
+                    res += direction*(1/elem.getValue())*(p_s_2 - p_f_2);
+                    break;
+                case 4:
+                    res += direction*(1/elem.getValue())*(p_s_1 - p_f_1);
+                    break;
+                case 5:
+                    res += direction*elem.getValue();
+                    break;
             }
 
-            if(elem.getType() == 2) {
-                res += direction*(1/val);
-            }
-
-            else if(elem.getType() == 4) {
-                res += direction*(val);
-            }
-
-            else if(elem.getType() == 3) {
-                res += direction * (1 / val);
-            }
-
-
-            else if(elem.getType() == 1) {
-                res = direction;
-               // elem.printInfo();
-            }
 
         }
         return res;
@@ -314,6 +333,21 @@ public class Solver implements Cloneable{
         }
         return 0;
 
+    }
+    public int searchEMF_Index(Element elem){
+        for(int i = 0; i < scheme.EMF_Numbers(); i++){
+            if(scheme.getEMF(i) == elem){
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    public void printVector(){
+        System.out.print("Vector:\n");
+        for(int i = 0; i < MSize; i++){
+            System.out.printf("%4.4f\n", vector.getEntry(i));
+        }
     }
 
 
