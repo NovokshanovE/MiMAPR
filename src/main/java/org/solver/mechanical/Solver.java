@@ -21,8 +21,8 @@ import java.util.Arrays;
 
 public class Solver implements Cloneable{
     private Scheme scheme;
-    private double dt= 1;
-    private double T = 10;
+    private double dt= 0.00001;
+    private double T = 1;
     private double r = 0.0001;
     private RealMatrix matrix;
     private RealVector vector;
@@ -78,19 +78,22 @@ public class Solver implements Cloneable{
         generateMatrix();
         printMatrix();
         generateVector();
-        printVector();
+        //printVector();
+        System.out.print("Curr:\n" + vector.toString() + "\n");
         Solve();
 
     }
     private void Solve(){
         for(double time = dt; time < T; time += dt){
             DecompositionSolver solver = new LUDecomposition(matrix).getSolver();
-            RealVector solution = solver.solve(vector);
-            unknown_prev = unknown_curr;
+            RealVector solution = solver.solve(vector.mapMultiplyToSelf(-1));
+            unknown_prev = unknown_curr.copy();
             unknown_curr = unknown_curr.add(solution);
+            generateVector();
             System.out.print("Curr:\n" + unknown_curr.toString() + "\n");
         }
     }
+
 
 
     public void setDeltaVar() {
