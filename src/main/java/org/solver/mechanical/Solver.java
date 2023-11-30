@@ -3,15 +3,13 @@ package org.solver.mechanical;
 
 
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.math4.legacy.linear.Array2DRowRealMatrix;
-import org.apache.commons.math4.legacy.linear.ArrayRealVector;
-import org.apache.commons.math4.legacy.linear.RealMatrix;
-import org.apache.commons.math4.legacy.linear.RealVector;
+import org.apache.commons.math4.legacy.linear.*;
 import org.solver.Element;
 import org.solver.Node;
 import org.solver.Scheme;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Этот класс необходим для решения задачи расширенным узловым методом для механических систем.<br />
@@ -23,12 +21,13 @@ import java.util.ArrayList;
 
 public class Solver implements Cloneable{
     private Scheme scheme;
-    private double dt= 0.0001;
+    private double dt= 1;
+    private double T = 10;
     private double r = 0.0001;
     private RealMatrix matrix;
     private RealVector vector;
-    private ArrayList<Double> unknown_prev;
-    private ArrayList<Double> unknown_curr;
+    private RealVector unknown_prev;
+    private RealVector unknown_curr;
 
     /**
      * количество строк
@@ -69,13 +68,10 @@ public class Solver implements Cloneable{
         this.MSize = 3*(scheme.nodeNumbers()-1) + scheme.EMF_Numbers();
         this.NSize = 3*(scheme.nodeNumbers()-1);
         this.EMFSize = scheme.EMF_Numbers();
-        this.unknown_prev = new ArrayList<Double>();
+        this.unknown_prev = new ArrayRealVector(MSize);
 
-        this.unknown_curr = new ArrayList<Double>();
-        for(int i = 0; i < MSize; i++){
-            unknown_curr.add(0.);
-            unknown_prev.add(0.);
-        }
+        this.unknown_curr = new ArrayRealVector(MSize);
+
 
         this.dt = 0.001;
         setDeltaVar();
@@ -83,6 +79,17 @@ public class Solver implements Cloneable{
         printMatrix();
         generateVector();
         printVector();
+        Solve();
+
+    }
+    private void Solve(){
+        for(double time = dt; time < T; time += dt){
+            DecompositionSolver solver = new LUDecomposition(matrix).getSolver();
+            RealVector solution = solver.solve(vector);
+            unknown_prev = unknown_curr;
+            unknown_curr = unknown_curr.add(solution);
+            System.out.print("Curr:\n" + unknown_curr.toString() + "\n");
+        }
     }
 
 
@@ -257,11 +264,11 @@ public class Solver implements Cloneable{
             switch (deltaVar.get(i).getLeft()){
                 case 0:
                     index = unknownFromIndexKey(2, deltaVar.get(i).getRight());
-                    vector.setEntry(i, unknown_curr.get(i) - (unknown_curr.get(index) - unknown_prev.get(index))/dt);
+                    vector.setEntry(i, unknown_curr.getEntry(i) - (unknown_curr.getEntry(index) - unknown_prev.getEntry(index))/dt);
                     break;
                 case 1:
                     index = unknownFromIndexKey(1, deltaVar.get(i).getRight());
-                    vector.setEntry(i, unknown_curr.get(index) - (unknown_curr.get(i)*dt + unknown_prev.get(index)));
+                    vector.setEntry(i, unknown_curr.getEntry(index) - (unknown_curr.getEntry(i)*dt + unknown_prev.getEntry(index)));
                     break;
                 case 2:
                     Node node = scheme.getNode(deltaVar.get(i).getRight());
@@ -281,12 +288,12 @@ public class Solver implements Cloneable{
         ArrayList<Element> nearest_elems = node.getNearest_elems();
         double res = 0.;
         for(Element elem: nearest_elems){
-            double p_s_0 = unknown_curr.get(unknownFromIndexKey(0,elem.getStart().getNumber()));
-            double p_f_0 = unknown_curr.get(unknownFromIndexKey(0,elem.getFinish().getNumber()));
-            double p_s_1 = unknown_curr.get(unknownFromIndexKey(1,elem.getStart().getNumber()));
-            double p_f_1 = unknown_curr.get(unknownFromIndexKey(1,elem.getFinish().getNumber()));
-            double p_s_2 = unknown_curr.get(unknownFromIndexKey(2,elem.getStart().getNumber()));
-            double p_f_2 = unknown_curr.get(unknownFromIndexKey(2,elem.getFinish().getNumber()));
+            double p_s_0 = unknown_curr.getEntry(unknownFromIndexKey(0,elem.getStart().getNumber()));
+            double p_f_0 = unknown_curr.getEntry(unknownFromIndexKey(0,elem.getFinish().getNumber()));
+            double p_s_1 = unknown_curr.getEntry(unknownFromIndexKey(1,elem.getStart().getNumber()));
+            double p_f_1 = unknown_curr.getEntry(unknownFromIndexKey(1,elem.getFinish().getNumber()));
+            double p_s_2 = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getStart().getNumber()));
+            double p_f_2 = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getFinish().getNumber()));
 
             double val = elem.getValue();
             int direction = 1;
@@ -297,7 +304,7 @@ public class Solver implements Cloneable{
             }
             switch (elem.getType()){
                 case 1:
-                    res += direction*unknown_curr.get(NSize+searchEMF_Index(elem));
+                    res += direction*unknown_curr.getEntry(NSize+searchEMF_Index(elem));
                     break;
                 case 2:
                     res += direction*elem.getValue()*(p_s_0 - p_f_0);
@@ -319,8 +326,8 @@ public class Solver implements Cloneable{
     }
     public double solveNearestEMFtoVector(Element elem){
         double res = 0.;
-        double p_s = unknown_curr.get(unknownFromIndexKey(2,elem.getStart().getNumber()));
-        double p_f = unknown_curr.get(unknownFromIndexKey(2,elem.getFinish().getNumber()));
+        double p_s = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getStart().getNumber()));
+        double p_f = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getFinish().getNumber()));
         res += p_s - p_f - elem.getValue();
         return res;
     }
