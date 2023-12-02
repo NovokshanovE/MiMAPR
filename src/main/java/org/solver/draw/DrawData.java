@@ -1,14 +1,9 @@
 package org.solver.draw;
 
 
-
 import javax.swing.*;
-        import java.awt.*;
-        import java.io.BufferedReader;
-        import java.io.FileReader;
-        import java.io.IOException;
-        import java.util.ArrayList;
-        import java.util.List;
+import java.awt.*;
+import java.util.List;
 
 class Point {
     double x, y;
@@ -43,17 +38,23 @@ class GraphPanel extends JPanel {
         int tickSizeX = (int) (0.1 * getWidth());
         for (int x = 20; x < getWidth(); x += tickSizeX) {
             g2d.drawLine(x, getHeight() / 2 - 5, x, getHeight() / 2 + 5);
-            double percentage = (double) (x - 20) / (getWidth() - 20) * maxX;
-            g2d.drawString(String.format("%.1f", percentage), x - 15, getHeight() / 2 + 20);
+            double coordinate = (x - 20) / (double) getWidth() * maxX;
+            g2d.drawString(String.format("%.1f", coordinate), x - 15, getHeight() / 2 + 20);
         }
 
         // Рисуем штрихи на оси Y
         double maxY = points.stream().mapToDouble(point -> point.y).max().orElse(1.0);
         int tickSizeY = (int) (0.1 * getHeight());
-        for (int y = 0; y < getHeight(); y += tickSizeY) {
+        for (int y = getHeight() / 2; y < getHeight(); y += tickSizeY) {
             g2d.drawLine(15, y, 25, y);
-            double coordinate = maxY - (double) y / getHeight() * maxY;
+            double coordinate = (y - getHeight() / 2) / (double) getHeight() * maxY;
             g2d.drawString(String.format("%.1f", coordinate), 30, y + 5);
+        }
+
+        for (int y = getHeight() / 2 - tickSizeY; y > 0; y -= tickSizeY) {
+            g2d.drawLine(15, y, 25, y);
+            double coordinate = (y - getHeight() / 2) / (double) getHeight() * maxY;
+            g2d.drawString(String.format("%.1f", -coordinate), 30, y + 5);
         }
 
         // Определяем смещение для центрирования графика

@@ -7,7 +7,12 @@ import org.solver.Element;
 import org.solver.Node;
 import org.solver.Scheme;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
+
 
 /**
  * Этот класс необходим для решения задачи расширенным узловым методом для механических систем.<br />
@@ -18,9 +23,10 @@ import java.util.ArrayList;
 
 
 public class Solver implements Cloneable{
+
     private Scheme scheme;
-    private double dt= 0.00001;
-    private double T = 1;
+    private double dt= 0.1;
+    private double T = 10;
     private double r = 0.0001;
     private RealMatrix matrix;
     private RealVector vector;
@@ -79,23 +85,34 @@ public class Solver implements Cloneable{
         printMatrix();
         generateVector();
         //printVector();
-        System.out.print("Curr:\n" + vector.toString() + "\n");
+//        System.out.print("Vector:\n" + vector.toString() + "\n");
+//        System.out.print("Curr:\n" + unknown_curr.toString() + "\n");
         Solve();
 
     }
-    /**
-     * TODO: необходимо исправить ошибку с сингулярной матрицей Якоби. Разобраться в том, почему резко возрастают значения неизвестных
-     *
-     *
-     */
     private void Solve(){
         for(double time = dt; time < T; time += dt){
-            DecompositionSolver solver = new LUDecomposition(matrix).getSolver();
-            RealVector solution = solver.solve(vector.mapMultiplyToSelf(-1));
+            for(int j = 0; j < 2; j++){
+                System.out.print("Curr:\n" + unknown_curr.toString() + "\n");
+                System.out.print("Vector:\n" + vector.toString() + "\n");
+                System.out.print("Matrix:\n" + matrix.toString() + "\n");
+
+                DecompositionSolver solver = new LUDecomposition(matrix).getSolver();
+                RealVector solution = solver.solve(vector.mapMultiplyToSelf(-1));
+                unknown_curr = unknown_curr.add(solution);
+                generateMatrix();
+                generateVector();
+                System.out.print("Delta:\n" + solution.toString() + "\n");
+
+
+
+            }
+            writeToFile(time, unknown_curr.getEntry(1), "integral_1.txt");
+            writeToFile(time, unknown_curr.getEntry(2), "potencial_1.txt");
+            writeToFile(time, unknown_curr.getEntry(3), "tok_1.txt");
             unknown_prev = unknown_curr.copy();
-            unknown_curr = unknown_curr.add(solution);
-            generateMatrix();
-            generateVector();
+
+
             System.out.print("Curr:\n" + unknown_curr.toString() + "\n");
         }
     }
@@ -123,8 +140,54 @@ public class Solver implements Cloneable{
 
         for(Element elem: nearest_elems){
             double val = elem.getValue();
-            int direction = 1;
+            int direction = 0;
             if(elem.getFinish() == node){
+                direction = -1;
+            } else if (elem.getStart() == node){
+                direction = 1;
+            }
+            switch (key){
+                case 0:
+                    if(elem.getType() == 2) {
+                        res += direction*(1/val);
+                    }
+                    break;
+                case 1:
+                    if(elem.getType() == 4) {
+                        res += direction*(val);
+                    }
+                    break;
+                case 2:
+
+                    //System.out.println("!!!");
+                    if(elem.getType() == 3) {
+                        res += direction * (1 / val);
+                    }
+
+                    break;
+                case 3:
+
+                    if(elem.getType() == 1) {
+                        res = direction;
+                        //elem.printInfo();
+                    }
+                    break;
+
+            }
+        }
+        return res;
+    }
+    public double solveNearestElementsToMatrix(Node node1, Node node2, int key){
+
+        ArrayList<Element> nearest_elems = node1.getNearest_elems();
+        double res = 0.;
+
+        for(Element elem: nearest_elems){
+            double val = elem.getValue();
+            int direction = 0;
+            if(node1 == node2){
+                direction = 1;
+            } else {
                 direction = -1;
             }
             switch (key){
@@ -159,7 +222,6 @@ public class Solver implements Cloneable{
         return res;
     }
 
-
     public void generateMatrix(){
 
 
@@ -187,11 +249,12 @@ public class Solver implements Cloneable{
                     }
                 } else{
                     for(int k = 0; k < deltaVar.size(); k++){
-                        int index = deltaVar.get(k).getRight();
+                        int index = deltaVar.get(i*3+j).getRight();
                         int key = deltaVar.get(k).getLeft();
                         if(key <= 2){
                             Node current_node = scheme.getNode(index);
-                            new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node, key));
+                            Node d_node = scheme.getNode(deltaVar.get(k).getRight());
+                            new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node,d_node, key));
                         }
                         else{
                             index = deltaVar.get(i*3+j).getRight();
@@ -276,8 +339,8 @@ public class Solver implements Cloneable{
                     vector.setEntry(i, unknown_curr.getEntry(i) - (unknown_curr.getEntry(index) - unknown_prev.getEntry(index))/dt);
                     break;
                 case 1:
-                    index = unknownFromIndexKey(1, deltaVar.get(i).getRight());
-                    vector.setEntry(i, unknown_curr.getEntry(index) - (unknown_curr.getEntry(i)*dt + unknown_prev.getEntry(index)));
+                    index = unknownFromIndexKey(2, deltaVar.get(i).getRight());
+                    vector.setEntry(i, unknown_curr.getEntry(i) - (unknown_curr.getEntry(index)*dt + unknown_prev.getEntry(i)));
                     break;
                 case 2:
                     Node node = scheme.getNode(deltaVar.get(i).getRight());
@@ -297,12 +360,23 @@ public class Solver implements Cloneable{
         ArrayList<Element> nearest_elems = node.getNearest_elems();
         double res = 0.;
         for(Element elem: nearest_elems){
-            double p_s_0 = unknown_curr.getEntry(unknownFromIndexKey(0,elem.getStart().getNumber()));
-            double p_f_0 = unknown_curr.getEntry(unknownFromIndexKey(0,elem.getFinish().getNumber()));
-            double p_s_1 = unknown_curr.getEntry(unknownFromIndexKey(1,elem.getStart().getNumber()));
-            double p_f_1 = unknown_curr.getEntry(unknownFromIndexKey(1,elem.getFinish().getNumber()));
-            double p_s_2 = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getStart().getNumber()));
-            double p_f_2 = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getFinish().getNumber()));
+            double p_s_0 = 0;
+            double p_f_0 = 0;
+            double p_s_1 = 0;
+            double p_f_1 = 0;
+            double p_s_2 = 0;
+            double p_f_2 = 0;
+
+            if(elem.getStart().getNumber() != 0){
+                p_s_2 = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getStart().getNumber()));
+                p_s_1 = unknown_curr.getEntry(unknownFromIndexKey(1,elem.getStart().getNumber()));
+                p_s_0 = unknown_curr.getEntry(unknownFromIndexKey(0,elem.getStart().getNumber()));
+            }
+            if(elem.getFinish().getNumber() != 0){
+                p_f_2 = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getFinish().getNumber()));
+                p_f_1 = unknown_curr.getEntry(unknownFromIndexKey(1,elem.getFinish().getNumber()));
+                p_f_0 = unknown_curr.getEntry(unknownFromIndexKey(0,elem.getFinish().getNumber()));
+            }
 
             double val = elem.getValue();
             int direction = 1;
@@ -335,8 +409,16 @@ public class Solver implements Cloneable{
     }
     private double solveNearestEMFtoVector(Element elem){
         double res = 0.;
-        double p_s = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getStart().getNumber()));
-        double p_f = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getFinish().getNumber()));
+        double p_s = 0;
+        double p_f = 0;
+        if(elem.getStart().getNumber() != 0){
+            p_s = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getStart().getNumber()));
+
+        }
+        if(elem.getFinish().getNumber() != 0){
+            p_f = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getFinish().getNumber()));
+        }
+
         res += p_s - p_f - elem.getValue();
         return res;
     }
@@ -344,7 +426,7 @@ public class Solver implements Cloneable{
     private int unknownFromIndexKey(int key, int i){
         for(int j = 0; j < MSize; j++){
             if(deltaVar.get(j).getRight() == i && deltaVar.get(j).getLeft() == key){
-                return i;
+                return j;
             }
         }
         return 0;
@@ -363,6 +445,16 @@ public class Solver implements Cloneable{
         System.out.print("Vector:\n");
         for(int i = 0; i < MSize; i++){
             System.out.printf("%4.4f\n", vector.getEntry(i));
+        }
+    }
+    public static void writeToFile(double number1, double number2, String filename) {
+        Locale.setDefault(Locale.US);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
+            // Записываем два числа через пробел, каждая новая запись в новой строке
+            writer.write(String.format("%.2f %.2f%n", number1, number2));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Ошибка при записи в файл");
         }
     }
 

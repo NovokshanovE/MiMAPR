@@ -42,6 +42,9 @@ public class Element {
     public double getValue() {
         return value;
     }
+//    public double getValue(double t) {
+//        return ;
+//    }
 
     public Node getFinish() {
         return finish;
