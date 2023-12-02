@@ -1,7 +1,6 @@
 package org.solver.mechanical;
 
 
-
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.math4.legacy.linear.*;
 import org.solver.Element;
@@ -9,7 +8,6 @@ import org.solver.Node;
 import org.solver.Scheme;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Этот класс необходим для решения задачи расширенным узловым методом для механических систем.<br />
@@ -52,7 +50,9 @@ public class Solver implements Cloneable{
      * 2 - потенциал;
      * 3 - ток ЭДС.
      * */
+
     private ArrayList<MutablePair<Integer, Integer>> deltaVar = new ArrayList<>();
+
     public Solver(Scheme scheme) throws CloneNotSupportedException {
 
 
@@ -94,6 +94,7 @@ public class Solver implements Cloneable{
             RealVector solution = solver.solve(vector.mapMultiplyToSelf(-1));
             unknown_prev = unknown_curr.copy();
             unknown_curr = unknown_curr.add(solution);
+            generateMatrix();
             generateVector();
             System.out.print("Curr:\n" + unknown_curr.toString() + "\n");
         }
@@ -291,7 +292,7 @@ public class Solver implements Cloneable{
 
 
     }
-    public double solveNearestElementsToVector(Node node){
+    private double solveNearestElementsToVector(Node node){
 
         ArrayList<Element> nearest_elems = node.getNearest_elems();
         double res = 0.;
@@ -332,7 +333,7 @@ public class Solver implements Cloneable{
         }
         return res;
     }
-    public double solveNearestEMFtoVector(Element elem){
+    private double solveNearestEMFtoVector(Element elem){
         double res = 0.;
         double p_s = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getStart().getNumber()));
         double p_f = unknown_curr.getEntry(unknownFromIndexKey(2,elem.getFinish().getNumber()));
@@ -340,7 +341,7 @@ public class Solver implements Cloneable{
         return res;
     }
 
-    public int unknownFromIndexKey(int key, int i){
+    private int unknownFromIndexKey(int key, int i){
         for(int j = 0; j < MSize; j++){
             if(deltaVar.get(j).getRight() == i && deltaVar.get(j).getLeft() == key){
                 return i;
@@ -349,7 +350,7 @@ public class Solver implements Cloneable{
         return 0;
 
     }
-    public int searchEMF_Index(Element elem){
+    private int searchEMF_Index(Element elem){
         for(int i = 0; i < scheme.EMF_Numbers(); i++){
             if(scheme.getEMF(i) == elem){
                 return i;
