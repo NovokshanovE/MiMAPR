@@ -26,7 +26,7 @@ public class Solver implements Cloneable{
 
     private Scheme scheme;
     private double dt= 0.1;
-    private double T = 0.3;
+    private double T = 0.1;
     private double r = 0.000001;
     private RealMatrix matrix;
     private RealVector vector;
@@ -108,7 +108,7 @@ public class Solver implements Cloneable{
 
             }
             //writeToFile(time, unknown_curr.getEntry(1), "integral_1.txt");
-            writeToFile(time, unknown_curr.getEntry(8), "potencial.txt");
+            writeToFile(time, unknown_curr.getEntry(15), "potencial.txt");
             //writeToFile(time, unknown_curr.getEntry(3), "tok_1.txt");
             unknown_prev = unknown_curr.copy();
 
