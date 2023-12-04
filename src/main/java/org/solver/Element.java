@@ -75,4 +75,7 @@ public class Element {
 
     }
 
+    public String getName() {
+        return name;
+    }
 }

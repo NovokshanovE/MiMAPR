@@ -31,7 +31,7 @@ public class GraphPlotterWithoutJFreeChart extends JFrame {
     public GraphPlotterWithoutJFreeChart(String title) {
         super(title);
 
-        List<Point> points = readDataFromFile("integral_1.txt");
+        List<Point> points = readDataFromFile("potential.txt");
         GraphPanel graphPanel = new GraphPanel(points);
         getContentPane().add(graphPanel);
 
