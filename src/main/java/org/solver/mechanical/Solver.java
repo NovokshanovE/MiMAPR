@@ -26,8 +26,8 @@ public class Solver implements Cloneable{
 
     private Scheme scheme;
     private double dt= 0.1;
-    private double T = 10;
-    private double r = 0.0001;
+    private double T = 0.3;
+    private double r = 0.000001;
     private RealMatrix matrix;
     private RealVector vector;
     private RealVector unknown_prev;
@@ -79,7 +79,7 @@ public class Solver implements Cloneable{
         this.unknown_curr = new ArrayRealVector(MSize);
 
 
-        this.dt = 0.001;
+        this.dt = 0.00001;
         setDeltaVar();
         generateMatrix();
         printMatrix();
@@ -92,17 +92,17 @@ public class Solver implements Cloneable{
     }
     private void Solve(){
         for(double time = dt; time < T; time += dt){
-            for(int j = 0; j < 2; j++){
-                System.out.print("Curr:\n" + unknown_curr.toString() + "\n");
-                System.out.print("Vector:\n" + vector.toString() + "\n");
-                System.out.print("Matrix:\n" + matrix.toString() + "\n");
+            for(int j = 0; j < 8; j++){
+//                System.out.print("Curr:\n" + unknown_curr.toString() + "\n");
+//                System.out.print("Vector:\n" + vector.toString() + "\n");
+//                System.out.print("Matrix:\n" + matrix.toString() + "\n");
 
                 DecompositionSolver solver = new LUDecomposition(matrix).getSolver();
                 RealVector solution = solver.solve(vector.mapMultiplyToSelf(-1));
                 unknown_curr = unknown_curr.add(solution);
                 generateMatrix();
                 generateVector();
-                System.out.print("Delta:\n" + solution.toString() + "\n");
+//                System.out.print("Delta:\n" + solution.toString() + "\n");
 
 
 
@@ -141,9 +141,9 @@ public class Solver implements Cloneable{
         for(Element elem: nearest_elems){
             double val = elem.getValue();
             int direction = 0;
-            if(elem.getFinish() == node){
+            if(elem.getFinish() == node && (node == elem.getStart() || node == elem.getFinish())){
                 direction = -1;
-            } else if (elem.getStart() == node){
+            } else if (elem.getStart() == node && (node == elem.getStart() || node == elem.getFinish())){
                 direction = 1;
             }
             switch (key){
@@ -193,12 +193,12 @@ public class Solver implements Cloneable{
             switch (key){
                 case 0:
                     if(elem.getType() == 2) {
-                        res += direction*(1/val);
+                        res += direction*(val);
                     }
                     break;
                 case 1:
                     if(elem.getType() == 4) {
-                        res += direction*(val);
+                        res += direction*(1/val);
                     }
                     break;
                 case 2:
@@ -261,8 +261,8 @@ public class Solver implements Cloneable{
 
                             Node current_node = scheme.getNode(index);
                             Node d_node = scheme.getNode(deltaVar.get(k).getRight());
-                            //new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node, key));
-                            new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node,d_node, key));
+                            new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node, key));
+                            //new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node,d_node, key));
 
                         }
 
@@ -453,7 +453,7 @@ public class Solver implements Cloneable{
         Locale.setDefault(Locale.US);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
             // Записываем два числа через пробел, каждая новая запись в новой строке
-            writer.write(String.format("%.2f %.2f%n", number1, number2));
+            writer.write(String.format("%f %f%n", number1, number2));
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Ошибка при записи в файл");
