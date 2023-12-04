@@ -4,6 +4,7 @@ package org.solver.mechanical;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.math4.legacy.linear.*;
 import org.solver.Element;
+import org.solver.FileWriterSolution;
 import org.solver.Node;
 import org.solver.Scheme;
 
@@ -25,14 +26,14 @@ import java.util.Locale;
 public class Solver implements Cloneable{
 
     private Scheme scheme;
-    private double dt= 0.1;
-    private double T = 0.1;
-    private double r = 0.000001;
+    private double dt= 0.0001;
+    private double T = 0.3;
+    private double r = 0.001;
     private RealMatrix matrix;
     private RealVector vector;
     private RealVector unknown_prev;
     private RealVector unknown_curr;
-
+    private FileWriterSolution output;
     /**
      * количество строк
      */
@@ -77,9 +78,11 @@ public class Solver implements Cloneable{
         this.unknown_prev = new ArrayRealVector(MSize);
 
         this.unknown_curr = new ArrayRealVector(MSize);
+        int key = (int) (Math.random()*(1000000000));
+        output = new FileWriterSolution("output"+String.valueOf(key) + ".txt");
+        output.filenameToFile();
 
-
-        this.dt = 0.00001;
+//        this.dt = 0.00001;
         setDeltaVar();
         generateMatrix();
         printMatrix();
@@ -88,6 +91,29 @@ public class Solver implements Cloneable{
 //        System.out.print("Vector:\n" + vector.toString() + "\n");
 //        System.out.print("Curr:\n" + unknown_curr.toString() + "\n");
         Solve();
+
+        printMatrix();
+        StringBuilder str = new StringBuilder("time");
+
+        for(MutablePair<Integer, Integer> param: deltaVar) {
+            switch (param.getLeft()){
+                case 0:
+                    str.append(String.format(",d(p%d)", param.getRight()) );
+                    break;
+                case 1:
+                    str.append(String.format(",J(p%d)", param.getRight()));
+                    break;
+                case 2:
+                    str.append(String.format(",p%d", param.getRight()));
+                    break;
+                case 3:
+                    str.append(String.format(",I{%s}", scheme.getEMF(param.getRight()).getName()));
+                    break;
+            }
+        }
+
+
+        output.stringToFile(str.toString(), "names.txt");
 
     }
     private void Solve(){
@@ -108,7 +134,10 @@ public class Solver implements Cloneable{
 
             }
             //writeToFile(time, unknown_curr.getEntry(1), "integral_1.txt");
-            writeToFile(time, unknown_curr.getEntry(15), "potencial.txt");
+
+            //writeToFile(time, unknown_curr.getEntry(15), "potencial.txt");
+            output.writeToFile(time, unknown_curr.toArray());
+            System.out.print("AAA");
             //writeToFile(time, unknown_curr.getEntry(3), "tok_1.txt");
             unknown_prev = unknown_curr.copy();
 
@@ -302,7 +331,7 @@ public class Solver implements Cloneable{
                     System.out.printf("p%d ", param.getRight());
                     break;
                 case 3:
-                    System.out.printf("I_{E_%d} ", param.getRight());
+                    System.out.printf("I_{%s} ", scheme.getEMF(param.getRight()).getName() );
                     break;
             }
         }
@@ -319,7 +348,7 @@ public class Solver implements Cloneable{
                     System.out.printf("p%d  ", deltaVar.get(i).getRight());
                     break;
                 case 3:
-                    System.out.printf("I_{E_%d} ", deltaVar.get(i).getRight());
+                    System.out.printf("I_{%s} ", scheme.getEMF(deltaVar.get(i).getRight()).getName());
                     break;
             }
             for(int j = 0; j < MSize; j++){
@@ -465,3 +494,5 @@ public class Solver implements Cloneable{
 
 
 }
+
+
