@@ -107,9 +107,9 @@ public class Solver implements Cloneable{
 
 
             }
-            writeToFile(time, unknown_curr.getEntry(1), "integral_1.txt");
-            writeToFile(time, unknown_curr.getEntry(2), "potencial_1.txt");
-            writeToFile(time, unknown_curr.getEntry(3), "tok_1.txt");
+            //writeToFile(time, unknown_curr.getEntry(1), "integral_1.txt");
+            writeToFile(time, unknown_curr.getEntry(8), "potencial.txt");
+            //writeToFile(time, unknown_curr.getEntry(3), "tok_1.txt");
             unknown_prev = unknown_curr.copy();
 
 
@@ -185,9 +185,9 @@ public class Solver implements Cloneable{
         for(Element elem: nearest_elems){
             double val = elem.getValue();
             int direction = 0;
-            if(node1 == node2){
+            if(node1 == node2 && (node2 == elem.getStart() || node2 == elem.getFinish())){
                 direction = 1;
-            } else {
+            } else if(node1 != node2 && (node2 == elem.getStart() || node2 == elem.getFinish())){
                 direction = -1;
             }
             switch (key){
@@ -260,7 +260,9 @@ public class Solver implements Cloneable{
                             index = deltaVar.get(i*3+j).getRight();
 
                             Node current_node = scheme.getNode(index);
-                            new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node, key));
+                            Node d_node = scheme.getNode(deltaVar.get(k).getRight());
+                            //new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node, key));
+                            new_matrix.setEntry(i*3+j, k, solveNearestElementsToMatrix(current_node,d_node, key));
 
                         }
 
